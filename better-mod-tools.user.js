@@ -346,9 +346,38 @@ $(document).ready(function(e) {
     }
 });
 
-$(document).on("DOMNodeInserted", function(e) {
-    var elem = $(e.target);
-    if (elem.hasClass("post-issue")) {
+
+// ok, there's two possibilities here: 
+// 1. this is running BEFORE the marginal mod indicators have loaded (probably true but not guaranteed)
+// 2. this is running AFTER the mraginal mod indicators have loaded and they've already been inserted into the page DOM
+//
+// To make this robust AND avoid having to load them twice... design the logic such that it expects them marginal indicators to already exist, 
+// and just wait for them to load before running.
+
+function WaitForMMI()
+{
+    var loaded = $.Deferred();
+    if ( $(".post-issue-display").length )
+      loaded.resolve();
+    
+   $(document)
+      .ajaxSuccess(function(event, XMLHttpRequest, ajaxOptions)
+      {
+         if (ajaxOptions.url.indexOf("/admin/posts/issues/") == 0)
+         {
+            setTimeout(() =>loaded.resolve(), 1);
+         }
+      });
+
+    return loaded.promise();
+}
+
+WaitForMMI().then(function()
+{
+    $(".post-issue").each(function()
+    {
+        var elem = $(this);
+
         var postId = elem.data('postid');
         var showLink = $('#comments-link-' + postId + ' .js-show-link');
         var deletedComments = elem.find('.fetch-deleted-comments').text().trim().split(' ')[0];
@@ -364,8 +393,7 @@ $(document).on("DOMNodeInserted", function(e) {
             voteMenu.append(flagsIndicator);
         }
 
-        elem.remove();
-    }
+    }).hide();
 });
 
 var sheet = (function() {
