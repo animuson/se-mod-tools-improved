@@ -2,7 +2,7 @@
 // @name        Stack Exchange Moderator Tools Improved
 // @description Moves the info from the post issues box and moves options out of the mod menu for easier access.
 // @author      animuson
-// @version     0.1.5
+// @version     0.1.6
 // @namespace   https://github.com/animuson
 // @grant       none
 // @match       *://*.stackexchange.com/*
@@ -15,10 +15,11 @@
 // @match       *://*.mathoverflow.net/*
 // ==/UserScript==
 
+if ( typeof $ === "undefined" ) return;
+
 $(document).ready(function(e) {
-    if (typeof StackExchange == "undefined") {
-        // Maybe show an error with a button to attempt reload? Do later.
-    } else if (StackExchange.options.user.isModerator) {
+    if (typeof StackExchange == "undefined" || !StackExchange.options || !StackExchange.options.user || !StackExchange.options.user.isModerator ) return;
+    
         var $posts = $('.question, .answer');
         var modMenu = { 'question': '', 'answer': '' };
 
@@ -303,7 +304,7 @@ $(document).ready(function(e) {
                 $comments.append('<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link">show deleted</a>');
             });
         }
-        
+
         $('[id^=comments-link-]').on('click', function(event) {
             $target = $(event.target);
             if (!$target.hasClass('fetch-deleted-comments')) return;
@@ -316,7 +317,7 @@ $(document).ready(function(e) {
                 }
             }).success(function (data) {
                 $('#comments-' + postId).removeClass('dno');
-                $('#comments-' + postId + ' tbody').html(data);
+                $('#comments-' + postId).find('ul.comments-list,tbody').html(data);
                 $('#comments-' + postId + ' .undelete-comment').click(function(event) {
                     var e = $(this);
                     var comment = e.closest('.comment');
@@ -342,8 +343,7 @@ $(document).ready(function(e) {
             }).error(function () {
                 $('#comments-link-' + postId).showErrorMessage("An error has occurred - please retry your request.");
             });
-        });
-    }
+        }); 
 });
 
 
