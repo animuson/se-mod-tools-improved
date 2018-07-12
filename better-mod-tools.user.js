@@ -2,7 +2,7 @@
 // @name        Stack Exchange Moderator Tools Improved
 // @description Moves the info from the post issues box and moves options out of the mod menu for easier access.
 // @author      animuson
-// @version     0.1.6
+// @version     0.1.7
 // @namespace   https://github.com/animuson
 // @grant       none
 // @match       *://*.stackexchange.com/*
@@ -24,7 +24,7 @@ $(document).ready(function(e) {
         var modMenu = { 'question': '', 'answer': '' };
 
         $posts.each(function() {
-            var postIssues = $(this).find('.post-issue');
+            var postIssues = $(this).find('.js-post-issues');
             var postMenu = $(this).find('.post-menu');
             var postType = $(this).hasClass('question') ? 'question' : 'answer';
             var postId = $(this).data(postType + 'id');
@@ -346,55 +346,27 @@ $(document).ready(function(e) {
         }); 
 });
 
-
-// ok, there's two possibilities here: 
-// 1. this is running BEFORE the marginal mod indicators have loaded (probably true but not guaranteed)
-// 2. this is running AFTER the mraginal mod indicators have loaded and they've already been inserted into the page DOM
-//
-// To make this robust AND avoid having to load them twice... design the logic such that it expects them marginal indicators to already exist, 
-// and just wait for them to load before running.
-
-function WaitForMMI()
+$(".js-post-issues").each(function()
 {
-    var loaded = $.Deferred();
-    if ( $(".post-issue-display").length )
-      loaded.resolve();
+    var elem = $(this);
+    var post = elem.parents(".question, .answer");
+    var postId = post.data("questionid") || post.data("answerid");
     
-   $(document)
-      .ajaxSuccess(function(event, XMLHttpRequest, ajaxOptions)
-      {
-         if (ajaxOptions.url.indexOf("/admin/posts/issues/") == 0)
-         {
-            setTimeout(() =>loaded.resolve(), 1);
-         }
-      });
+    var showLink = $('#comments-link-' + postId + ' .js-show-link');
+    var deletedComments = +elem.find('.js-fetch-deleted-comments').text();
+    if (deletedComments !== '') {
+        var deletedCommentsLink = '<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link"><b>' + deletedComments + '</b> deleted</a>';
+        showLink.after(deletedCommentsLink);
+    }
 
-    return loaded.promise();
-}
+    var numberFlags = +elem.find('a[href="/admin/posts/' + postId + '/show-flags"]').text();
+    if (numberFlags !== '') {
+        var voteMenu = elem.parent().find('.vote');
+        var flagsIndicator = '<a href="/admin/posts/' + postId + '/show-flags" class="bounty-award-container" target="_blank"><span class="bounty-award supernovabg" style="font-size: 1em; margin-top: 10px" title="flags on this post">' + numberFlags + '</span></a>';
+        voteMenu.append(flagsIndicator);
+    }
 
-WaitForMMI().then(function()
-{
-    $(".post-issue").each(function()
-    {
-        var elem = $(this);
-
-        var postId = elem.data('postid');
-        var showLink = $('#comments-link-' + postId + ' .js-show-link');
-        var deletedComments = elem.find('.fetch-deleted-comments').text().trim().split(' ')[0];
-        if (deletedComments !== '') {
-            var deletedCommentsLink = '<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link"><b>' + deletedComments + '</b> deleted</a>';
-            showLink.after(deletedCommentsLink);
-        }
-
-        var numberFlags = elem.find('a:first-child:not(.fetch-deleted-comments)').text().trim().split(' ')[0];
-        if (numberFlags !== '') {
-            var voteMenu = elem.parent().find('.vote');
-            var flagsIndicator = '<a href="/admin/posts/' + postId + '/show-flags" class="bounty-award-container" target="_blank"><span class="bounty-award supernovabg" style="font-size: 1em; margin-top: 10px" title="flags on this post">' + numberFlags + '</span></a>';
-            voteMenu.append(flagsIndicator);
-        }
-
-    }).hide();
-});
+})
 
 var sheet = (function() {
     var style = document.createElement("style");
