@@ -354,18 +354,10 @@ $(".js-post-issues").each(function()
     
     var showLink = $('#comments-link-' + postId + ' .js-show-link');
     var deletedComments = +elem.find('.js-fetch-deleted-comments').text();
-    if (deletedComments !== '') {
+    if (deletedComments > 0) {
         var deletedCommentsLink = '<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link"><b>' + deletedComments + '</b> deleted</a>';
         showLink.after(deletedCommentsLink);
     }
-
-    var numberFlags = +elem.find('a[href="/admin/posts/' + postId + '/show-flags"]').text();
-    if (numberFlags !== '') {
-        var voteMenu = elem.parent().find('.vote');
-        var flagsIndicator = '<a href="/admin/posts/' + postId + '/show-flags" class="bounty-award-container" target="_blank"><span class="bounty-award supernovabg" style="font-size: 1em; margin-top: 10px" title="flags on this post">' + numberFlags + '</span></a>';
-        voteMenu.append(flagsIndicator);
-    }
-
 })
 
 var sheet = (function() {
