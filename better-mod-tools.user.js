@@ -24,7 +24,7 @@ $(document).ready(function(e) {
         var modMenu = { 'question': '', 'answer': '' };
 
         $posts.each(function() {
-            var postIssues = $(this).find('.js-post-issues');
+            var postIssues = $(this).find('.js-post-issue');
             var postMenu = $(this).find('.post-menu');
             var postType = $(this).hasClass('question') ? 'question' : 'answer';
             var postId = $(this).data(postType + 'id');
@@ -140,7 +140,14 @@ $(document).ready(function(e) {
                 var bountyLink = '<a id="remove-bounty-' + postId + '" data-postid="' + postId + '" class="remove-bounty-link red-mod-link" style="display: inline-block; margin-bottom: 1em" title="refund the bounty amount and remove the bounty notice">remove bounty</a>';
                 $('.bounty-notification .question-status.bounty').append(bountyLink);
             }
+            
+           var deletedComments = +postIssues.filter('.js-fetch-deleted-comments').text();
+           if (deletedComments > 0) {
+              var deletedCommentsLink = '<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link"><b>' + deletedComments + '</b> deleted</a>';
+              showLink.after(deletedCommentsLink);
+           }            
         });
+        
         $('.unlock-post-link').click(function(event) {
            if (window.confirm('Are you sure you want to unlock this post?')) {
                completeBasicAction('unlock', $(this), false);
@@ -345,20 +352,6 @@ $(document).ready(function(e) {
             });
         }); 
 });
-
-$(".js-post-issues").each(function()
-{
-    var elem = $(this);
-    var post = elem.parents(".question, .answer");
-    var postId = post.data("questionid") || post.data("answerid");
-    
-    var showLink = $('#comments-link-' + postId + ' .js-show-link');
-    var deletedComments = +elem.find('.js-fetch-deleted-comments').text();
-    if (deletedComments > 0) {
-        var deletedCommentsLink = '<span class="js-deleted-separator">&nbsp;|&nbsp;</span><a class="fetch-deleted-comments comments-link red-mod-link"><b>' + deletedComments + '</b> deleted</a>';
-        showLink.after(deletedCommentsLink);
-    }
-})
 
 var sheet = (function() {
     var style = document.createElement("style");
