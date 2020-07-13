@@ -1,3 +1,7 @@
+# Archived
+
+This repository has been archived. Due to changes that have been made to the system, many of these features are either already implemented directly or no longer work. Other user scripts exist out there to do many of the remaining tasks that were not covered by recent tooling changes.
+
 # Stack Exchange Moderator Tools Improved
 
 This is a user script which moves most of the options *out* of the mod menu and directly onto the post.
